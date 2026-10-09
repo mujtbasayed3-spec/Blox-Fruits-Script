@@ -1,5 +1,5 @@
 --===================================================================================--
---        STANDALONE BLOX FRUITS UTILITY HUB (SEA 6 & FOG UPDATE V5)          --
+--        STANDALONE BLOX FRUITS UTILITY HUB (NOCLIP INTEGRATED V6)                   --
 --===================================================================================--
 
 local Players = game:GetService("Players")
@@ -22,6 +22,7 @@ local Settings = {
     FlySpeed = 50,
     JumpEnabled = false,
     CustomJumpPower = 100,
+    NoclipEnabled = false,
     FruitESPEnabled = false,
     PlayerESPEnabled = false,
     NoFogEnabled = false,
@@ -31,6 +32,7 @@ local Settings = {
 -- ESP Containers & Connections
 local ESPContainers = { Fruits = {}, Players = {} }
 local PlayerESPConnections = {}
+local FruitWorkspaceConnections = {}
 
 -- Re-bind Character/Humanoid/RootPart on respawn
 LocalPlayer.CharacterAdded:Connect(function(newChar)
@@ -61,8 +63,8 @@ ScreenGui.Parent = CoreGui
 -- Main Container Window
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 360, 0, 440)
-MainFrame.Position = UDim2.new(0.5, -180, 0.35, -220)
+MainFrame.Size = UDim2.new(0, 360, 0, 480)
+MainFrame.Position = UDim2.new(0.5, -180, 0.35, -240)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
@@ -96,7 +98,7 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, -70, 1, 0)
 TitleLabel.Position = UDim2.new(0, 10, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Blox Fruits Utility Hub v5"
+TitleLabel.Text = "Blox Fruits Utility Hub v6"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.TextSize = 14
 TitleLabel.Font = Enum.Font.SourceSansBold
@@ -261,7 +263,7 @@ ESPTabBtn.MouseButton1Click:Connect(function()
 end)
 
 --===================================================================================--
---                               TAB 1: MAIN CONTROLS                                --
+--                                TAB 1: MAIN CONTROLS                               --
 --===================================================================================--
 
 -- Speed Toggle
@@ -394,8 +396,29 @@ JumpInput.FocusLost:Connect(function()
     end
 end)
 
+-- Noclip Toggle Button
+local NoclipBtn = Instance.new("TextButton")
+NoclipBtn.Size = UDim2.new(1, 0, 0, 30)
+NoclipBtn.Position = UDim2.new(0, 0, 0, 225)
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+NoclipBtn.Text = "Noclip (اختراق الجدران): OFF"
+NoclipBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+NoclipBtn.Font = Enum.Font.SourceSansBold
+NoclipBtn.TextSize = 13
+NoclipBtn.Parent = MainContent
+
+local NCCorner = Instance.new("UICorner")
+NCCorner.CornerRadius = UDim.new(0, 6)
+NCCorner.Parent = NoclipBtn
+
+NoclipBtn.MouseButton1Click:Connect(function()
+    Settings.NoclipEnabled = not Settings.NoclipEnabled
+    NoclipBtn.Text = Settings.NoclipEnabled and "Noclip (اختراق الجدران): ON" or "Noclip (اختراق الجدران): OFF"
+    NoclipBtn.TextColor3 = Settings.NoclipEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
+end)
+
 --===================================================================================--
---                               FLY & SPEED ENGINE                                  --
+--                            FLY, SPEED & NOCLIP ENGINE                              --
 --===================================================================================--
 
 local BodyVelocity, BodyGyro
@@ -482,6 +505,17 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- Noclip Stepped Loop (Disables Part Collisions Continuously)
+RunService.Stepped:Connect(function()
+    if Settings.NoclipEnabled and Character then
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
 --===================================================================================--
 --                         TAB 2: VISUALS & LIGHTING CONTROL                         --
 --===================================================================================--
@@ -514,7 +548,7 @@ local PESPCorner = Instance.new("UICorner")
 PESPCorner.CornerRadius = UDim.new(0, 6)
 PESPCorner.Parent = PlayerESPBtn
 
--- NEW BUTTON: Remove Fog
+-- REMOVE FOG BUTTON
 local RemoveFogBtn = Instance.new("TextButton")
 RemoveFogBtn.Size = UDim2.new(1, 0, 0, 30)
 RemoveFogBtn.Position = UDim2.new(0, 0, 0, 80)
@@ -529,7 +563,7 @@ local FogCorner = Instance.new("UICorner")
 FogCorner.CornerRadius = UDim.new(0, 6)
 FogCorner.Parent = RemoveFogBtn
 
--- NEW BUTTON: Remove Sea 6 Darkness / Fog
+-- REMOVE SEA 6 DARKNESS BUTTON
 local Sea6Btn = Instance.new("TextButton")
 Sea6Btn.Size = UDim2.new(1, 0, 0, 30)
 Sea6Btn.Position = UDim2.new(0, 0, 0, 118)
@@ -548,7 +582,6 @@ Sea6Corner.Parent = Sea6Btn
 --                       FOG & SEA 6 REMOVER LOGIC ENGINE                            --
 --===================================================================================--
 
--- Remove Normal Fog Loop & Event
 local function ApplyNoFog()
     if Settings.NoFogEnabled then
         Lighting.FogEnd = 100000
@@ -571,23 +604,18 @@ RemoveFogBtn.MouseButton1Click:Connect(function()
 end)
 
 Lighting.Changed:Connect(function()
-    if Settings.NoFogEnabled then
-        ApplyNoFog()
-    end
+    if Settings.NoFogEnabled then ApplyNoFog() end
 end)
 
--- Remove Sea 6 Darkness / Fog Loop
 local function CleanSea6Lighting()
-    -- Clear Sea 6 darkness effects from Lighting
     for _, obj in pairs(Lighting:GetChildren()) do
         if obj:IsA("Atmosphere") or obj:IsA("ColorCorrectionEffect") or obj:IsA("BloomEffect") or obj:IsA("BlurEffect") then
             if Settings.NoSea6Darkness then
-                obj.Parent = nil -- Temporary disable
+                obj.Parent = nil
             end
         end
     end
     
-    -- Clear custom lighting objects placed in Workspace by Sea Events
     for _, v in pairs(Workspace:GetChildren()) do
         if v.Name == "SeaDangerLighting" or string.find(v.Name, "SeaFog") or string.find(v.Name, "Darkness") then
             if Settings.NoSea6Darkness then
@@ -603,7 +631,6 @@ Sea6Btn.MouseButton1Click:Connect(function()
     Sea6Btn.TextColor3 = Settings.NoSea6Darkness and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
 end)
 
--- Continuous Render Loop to guarantee Sea 6 Visibility
 RunService.RenderStepped:Connect(function()
     if Settings.NoSea6Darkness then
         Lighting.ClockTime = 12
@@ -611,7 +638,6 @@ RunService.RenderStepped:Connect(function()
         Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
         CleanSea6Lighting()
         
-        -- Override local player camera fog/blur effects
         local cam = Workspace.CurrentCamera
         if cam then
             for _, child in pairs(cam:GetChildren()) do
@@ -624,10 +650,9 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --===================================================================================--
---                           GUARANTEED DYNAMIC ESP LOGIC                             --
+--                REALTIME DYNAMIC AUTOMATIC FRUIT & PLAYER ESP                       --
 --===================================================================================--
 
--- Fruit ESP Logic
 local function ClearFruitESP()
     for _, esp in pairs(ESPContainers.Fruits) do
         if esp and esp.Billboard then esp.Billboard:Destroy() end
@@ -635,9 +660,26 @@ local function ClearFruitESP()
     ESPContainers.Fruits = {}
 end
 
+local function IsFruit(obj)
+    if not obj then return false end
+    if (obj:IsA("Tool") or obj:IsA("Model")) and string.find(obj.Name, "Fruit") then
+        return true
+    end
+    return false
+end
+
 local function CreateFruitBillboard(fruit)
-    if not fruit then return end
+    if not fruit or not Settings.FruitESPEnabled then return end
+    
+    -- Check if already tracked
+    for _, item in pairs(ESPContainers.Fruits) do
+        if item.Fruit == fruit then return end
+    end
+
     local handle = fruit:FindFirstChild("Handle") or fruit:FindFirstChildOfClass("BasePart")
+    if not handle then
+        handle = fruit:WaitForChild("Handle", 2) or fruit:FindFirstChildOfClass("BasePart")
+    end
     if not handle or handle:FindFirstChild("FruitESP_Gui") then return end
 
     local billboard = Instance.new("BillboardGui")
@@ -665,17 +707,51 @@ local function ScanFruits()
     ClearFruitESP()
     if not Settings.FruitESPEnabled then return end
     for _, v in pairs(Workspace:GetDescendants()) do
-        if (v:IsA("Tool") or v:IsA("Model")) and string.find(v.Name, "Fruit") then
+        if IsFruit(v) then
             CreateFruitBillboard(v)
         end
     end
+end
+
+-- Hook Realtime Workspace Events for Instant Fruit Detection (Spawns / Drops)
+local function StartFruitListeners()
+    for _, conn in pairs(FruitWorkspaceConnections) do
+        if conn then conn:Disconnect() end
+    end
+    FruitWorkspaceConnections = {}
+
+    local c1 = Workspace.ChildAdded:Connect(function(child)
+        if Settings.FruitESPEnabled and IsFruit(child) then
+            task.wait(0.1)
+            CreateFruitBillboard(child)
+        end
+    end)
+    table.insert(FruitWorkspaceConnections, c1)
+
+    local c2 = Workspace.DescendantAdded:Connect(function(descendant)
+        if Settings.FruitESPEnabled and IsFruit(descendant) then
+            task.wait(0.1)
+            CreateFruitBillboard(descendant)
+        end
+    end)
+    table.insert(FruitWorkspaceConnections, c2)
 end
 
 FruitESPBtn.MouseButton1Click:Connect(function()
     Settings.FruitESPEnabled = not Settings.FruitESPEnabled
     FruitESPBtn.Text = Settings.FruitESPEnabled and "Fruit ESP: ON" or "Fruit ESP: OFF"
     FruitESPBtn.TextColor3 = Settings.FruitESPEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
-    if Settings.FruitESPEnabled then ScanFruits() else ClearFruitESP() end
+    
+    if Settings.FruitESPEnabled then 
+        ScanFruits() 
+        StartFruitListeners()
+    else 
+        ClearFruitESP() 
+        for _, conn in pairs(FruitWorkspaceConnections) do
+            if conn then conn:Disconnect() end
+        end
+        FruitWorkspaceConnections = {}
+    end
 end)
 
 -- Player ESP Helpers
@@ -798,9 +874,10 @@ PlayerESPBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- CONTINUOUS SCAN & POSITION UPDATER
+-- CONTINUOUS SCAN & POSITION UPDATER (Fruit Backup & Player Check)
 task.spawn(function()
     while task.wait(1) do
+        -- Player ESP scanning
         if Settings.PlayerESPEnabled then
             for _, player in pairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer then
@@ -810,15 +887,24 @@ task.spawn(function()
                 end
             end
         end
+        
+        -- Backup Fruit Check for missed fruits
+        if Settings.FruitESPEnabled then
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if IsFruit(v) then
+                    CreateFruitBillboard(v)
+                end
+            end
+        end
     end
 end)
 
 -- Realtime Distance and Color Updater
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.3) do
         local myRoot = Character and Character:FindFirstChild("HumanoidRootPart")
         
-        -- Fruit ESP Updates
+        -- Fruit ESP Distance Updates & Cleanup
         if Settings.FruitESPEnabled and myRoot then
             for i = #ESPContainers.Fruits, 1, -1 do
                 local entry = ESPContainers.Fruits[i]
