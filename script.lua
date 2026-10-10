@@ -1,5 +1,5 @@
 --===================================================================================--
---        STANDALONE BLOX FRUITS UTILITY HUB (NOCLIP INTEGRATED V6)                   --
+--        STANDALONE BLOX FRUITS UTILITY HUB (NOCLIP INTEGRATED V6)                  --
 --===================================================================================--
 
 local Players = game:GetService("Players")
@@ -63,8 +63,8 @@ ScreenGui.Parent = CoreGui
 -- Main Container Window
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 360, 0, 480)
-MainFrame.Position = UDim2.new(0.5, -180, 0.35, -240)
+MainFrame.Size = UDim2.new(0, 360, 0, 520)
+MainFrame.Position = UDim2.new(0.5, -180, 0.35, -260)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
@@ -548,10 +548,25 @@ local PESPCorner = Instance.new("UICorner")
 PESPCorner.CornerRadius = UDim.new(0, 6)
 PESPCorner.Parent = PlayerESPBtn
 
+-- TELEPORT TO FRUIT BUTTON (زر الانتقال المضاف)
+local TPFruitBtn = Instance.new("TextButton")
+TPFruitBtn.Size = UDim2.new(1, 0, 0, 30)
+TPFruitBtn.Position = UDim2.new(0, 0, 0, 80)
+TPFruitBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
+TPFruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TPFruitBtn.Font = Enum.Font.SourceSansBold
+TPFruitBtn.TextSize = 13
+TPFruitBtn.Parent = ESPContent
+
+local TPFruitCorner = Instance.new("UICorner")
+TPFruitCorner.CornerRadius = UDim.new(0, 6)
+TPFruitCorner.Parent = TPFruitBtn
+
 -- REMOVE FOG BUTTON
 local RemoveFogBtn = Instance.new("TextButton")
 RemoveFogBtn.Size = UDim2.new(1, 0, 0, 30)
-RemoveFogBtn.Position = UDim2.new(0, 0, 0, 80)
+RemoveFogBtn.Position = UDim2.new(0, 0, 0, 118)
 RemoveFogBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
 RemoveFogBtn.Text = "Remove Normal Fog: OFF"
 RemoveFogBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
@@ -566,7 +581,7 @@ FogCorner.Parent = RemoveFogBtn
 -- REMOVE SEA 6 DARKNESS BUTTON
 local Sea6Btn = Instance.new("TextButton")
 Sea6Btn.Size = UDim2.new(1, 0, 0, 30)
-Sea6Btn.Position = UDim2.new(0, 0, 0, 118)
+Sea6Btn.Position = UDim2.new(0, 0, 0, 156)
 Sea6Btn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
 Sea6Btn.Text = "Remove Sea 6 Darkness: OFF"
 Sea6Btn.TextColor3 = Color3.fromRGB(255, 80, 80)
@@ -577,6 +592,45 @@ Sea6Btn.Parent = ESPContent
 local Sea6Corner = Instance.new("UICorner")
 Sea6Corner.CornerRadius = UDim.new(0, 6)
 Sea6Corner.Parent = Sea6Btn
+
+--===================================================================================--
+--                       FRUIT TELEPORT ENGINE LOGIC                                 --
+--===================================================================================--
+
+local function TeleportToFruit()
+    if not RootPart then return end
+    
+    local nearestFruit = nil
+    local shortestDistance = math.huge
+    
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if (v:IsA("Tool") or v:IsA("Model")) and string.find(v.Name, "Fruit") then
+            local handle = v:FindFirstChild("Handle") or v:FindFirstChildOfClass("BasePart")
+            if handle then
+                local dist = (RootPart.Position - handle.Position).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    nearestFruit = handle
+                end
+            end
+        end
+    end
+    
+    if nearestFruit then
+        RootPart.CFrame = nearestFruit.CFrame + Vector3.new(0, 3, 0)
+        TPFruitBtn.Text = "✅ Teleported!"
+        task.wait(1.5)
+        TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
+    else
+        TPFruitBtn.Text = "❌ No Fruit Found!"
+        task.wait(1.5)
+        TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
+    end
+end
+
+TPFruitBtn.MouseButton1Click:Connect(function()
+    TeleportToFruit()
+end)
 
 --===================================================================================--
 --                       FOG & SEA 6 REMOVER LOGIC ENGINE                            --
