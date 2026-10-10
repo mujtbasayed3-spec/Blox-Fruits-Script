@@ -1,5 +1,5 @@
 --===================================================================================--
---        STANDALONE BLOX FRUITS UTILITY HUB (NOCLIP INTEGRATED V6)                  --
+--                       STANDALONE BLOX FRUITS UTILITY HUB (iraqX)                  --
 --===================================================================================--
 
 local Players = game:GetService("Players")
@@ -26,7 +26,8 @@ local Settings = {
     FruitESPEnabled = false,
     PlayerESPEnabled = false,
     NoFogEnabled = false,
-    NoSea6Darkness = false
+    NoSea6Darkness = false,
+    FruitFlyEnabled = false
 }
 
 -- ESP Containers & Connections
@@ -52,7 +53,7 @@ if CoreGui:FindFirstChild("BF_StandaloneHub") then
 end
 
 --===================================================================================--
---                                  MAIN SCREEN GUI                                  --
+--                                MAIN SCREEN GUI                                    --
 --===================================================================================--
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -95,15 +96,26 @@ TopBarCorner.CornerRadius = UDim.new(0, 8)
 TopBarCorner.Parent = TopBar
 
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, -70, 1, 0)
+TitleLabel.Size = UDim2.new(0, 160, 1, 0)
 TitleLabel.Position = UDim2.new(0, 10, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Blox Fruits Utility Hub v6"
+TitleLabel.Text = "iraqX"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 14
+TitleLabel.TextSize = 15
 TitleLabel.Font = Enum.Font.SourceSansBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TopBar
+
+local TikTokLabel = Instance.new("TextLabel")
+TikTokLabel.Size = UDim2.new(0, 130, 1, 0)
+TikTokLabel.Position = UDim2.new(1, -195, 0, 0)
+TikTokLabel.BackgroundTransparency = 1
+TikTokLabel.Text = "TikTok: mujtba.sayed"
+TikTokLabel.TextColor3 = Color3.fromRGB(0, 210, 255)
+TikTokLabel.TextSize = 12
+TikTokLabel.Font = Enum.Font.SourceSansBold
+TikTokLabel.TextXAlignment = Enum.TextXAlignment.Right
+TikTokLabel.Parent = TopBar
 
 -- Close (X) Button
 local CloseBtn = Instance.new("TextButton")
@@ -143,26 +155,29 @@ MinBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Floating Toggle Button
-local ToggleButton = Instance.new("TextButton")
+--===================================================================================--
+--                    FLOATING TOGGLE BUTTON (YOUR CUSTOM IMAGE)                      --
+--===================================================================================--
+
+local ToggleButton = Instance.new("ImageButton")
 ToggleButton.Name = "FloatingToggle"
-ToggleButton.Size = UDim2.new(0, 42, 0, 42)
+ToggleButton.Size = UDim2.new(0, 52, 0, 52)
 ToggleButton.Position = UDim2.new(0, 12, 0, 55)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
-ToggleButton.BackgroundTransparency = 0.2
-ToggleButton.Text = "⚡"
-ToggleButton.TextColor3 = Color3.fromRGB(0, 170, 255)
-ToggleButton.TextSize = 22
-ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.BackgroundTransparency = 0.1
+ToggleButton.ScaleType = Enum.ScaleType.Crop
+
+-- استخدام معرّف الصورة الخاص بك المرفوع على روبلوكس
+ToggleButton.Image = "rbxassetid://125840677896258"
 ToggleButton.Parent = ScreenGui
 
 local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 10)
+ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleButton
 
 local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Thickness = 1.5
-ToggleStroke.Color = Color3.fromRGB(0, 170, 255)
+ToggleStroke.Thickness = 2
+ToggleStroke.Color = Color3.fromRGB(0, 255, 150)
 ToggleStroke.Parent = ToggleButton
 
 -- Draggable button logic
@@ -263,7 +278,7 @@ ESPTabBtn.MouseButton1Click:Connect(function()
 end)
 
 --===================================================================================--
---                                TAB 1: MAIN CONTROLS                               --
+--                            TAB 1: MAIN CONTROLS                                   --
 --===================================================================================--
 
 -- Speed Toggle
@@ -418,7 +433,7 @@ NoclipBtn.MouseButton1Click:Connect(function()
 end)
 
 --===================================================================================--
---                            FLY, SPEED & NOCLIP ENGINE                              --
+--                        FLY, SPEED & NOCLIP ENGINE                                 --
 --===================================================================================--
 
 local BodyVelocity, BodyGyro
@@ -517,7 +532,7 @@ RunService.Stepped:Connect(function()
 end)
 
 --===================================================================================--
---                         TAB 2: VISUALS & LIGHTING CONTROL                         --
+--                       TAB 2: VISUALS & LIGHTING CONTROL                           --
 --===================================================================================--
 
 local FruitESPBtn = Instance.new("TextButton")
@@ -548,20 +563,20 @@ local PESPCorner = Instance.new("UICorner")
 PESPCorner.CornerRadius = UDim.new(0, 6)
 PESPCorner.Parent = PlayerESPBtn
 
--- TELEPORT TO FRUIT BUTTON (زر الانتقال المضاف)
-local TPFruitBtn = Instance.new("TextButton")
-TPFruitBtn.Size = UDim2.new(1, 0, 0, 30)
-TPFruitBtn.Position = UDim2.new(0, 0, 0, 80)
-TPFruitBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
-TPFruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TPFruitBtn.Font = Enum.Font.SourceSansBold
-TPFruitBtn.TextSize = 13
-TPFruitBtn.Parent = ESPContent
+-- FRUIT FLIGHT BUTTON
+local FruitFlightBtn = Instance.new("TextButton")
+FruitFlightBtn.Size = UDim2.new(1, 0, 0, 30)
+FruitFlightBtn.Position = UDim2.new(0, 0, 0, 80)
+FruitFlightBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+FruitFlightBtn.Text = Settings.FruitFlyEnabled and "Fruit Flight (طيران للفاكهة): ON" or "Fruit Flight (طيران للفاكهة): OFF"
+FruitFlightBtn.TextColor3 = Settings.FruitFlyEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
+FruitFlightBtn.Font = Enum.Font.SourceSansBold
+FruitFlightBtn.TextSize = 13
+FruitFlightBtn.Parent = ESPContent
 
-local TPFruitCorner = Instance.new("UICorner")
-TPFruitCorner.CornerRadius = UDim.new(0, 6)
-TPFruitCorner.Parent = TPFruitBtn
+local FruitFlightCorner = Instance.new("UICorner")
+FruitFlightCorner.CornerRadius = UDim.new(0, 6)
+FruitFlightCorner.Parent = FruitFlightBtn
 
 -- REMOVE FOG BUTTON
 local RemoveFogBtn = Instance.new("TextButton")
@@ -594,46 +609,41 @@ Sea6Corner.CornerRadius = UDim.new(0, 6)
 Sea6Corner.Parent = Sea6Btn
 
 --===================================================================================--
---                       FRUIT TELEPORT ENGINE LOGIC                                 --
+--                            FRUIT FLIGHT LOGIC ENGINE                              --
 --===================================================================================--
 
-local function TeleportToFruit()
-    if not RootPart then return end
-    
-    local nearestFruit = nil
-    local shortestDistance = math.huge
-    
-    for _, v in pairs(Workspace:GetDescendants()) do
-        if (v:IsA("Tool") or v:IsA("Model")) and string.find(v.Name, "Fruit") then
-            local handle = v:FindFirstChild("Handle") or v:FindFirstChildOfClass("BasePart")
-            if handle then
-                local dist = (RootPart.Position - handle.Position).Magnitude
-                if dist < shortestDistance then
-                    shortestDistance = dist
-                    nearestFruit = handle
+FruitFlightBtn.MouseButton1Click:Connect(function()
+    Settings.FruitFlyEnabled = not Settings.FruitFlyEnabled
+    FruitFlightBtn.Text = Settings.FruitFlyEnabled and "Fruit Flight (طيران للفاكهة): ON" or "Fruit Flight (طيران للفاكهة): OFF"
+    FruitFlightBtn.TextColor3 = Settings.FruitFlyEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.FruitFlyEnabled and RootPart then
+        local nearestFruit = nil
+        local shortestDistance = math.huge
+        
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if (v:IsA("Tool") or v:IsA("Model")) and string.find(v.Name, "Fruit") then
+                local handle = v:FindFirstChild("Handle") or v:FindFirstChildOfClass("BasePart")
+                if handle then
+                    local dist = (RootPart.Position - handle.Position).Magnitude
+                    if dist < shortestDistance then
+                        shortestDistance = dist
+                        nearestFruit = handle
+                    end
                 end
             end
         end
+        
+        if nearestFruit then
+            RootPart.CFrame = nearestFruit.CFrame + Vector3.new(0, 3, 0)
+        end
     end
-    
-    if nearestFruit then
-        RootPart.CFrame = nearestFruit.CFrame + Vector3.new(0, 3, 0)
-        TPFruitBtn.Text = "✅ Teleported!"
-        task.wait(1.5)
-        TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
-    else
-        TPFruitBtn.Text = "❌ No Fruit Found!"
-        task.wait(1.5)
-        TPFruitBtn.Text = "🍎 Teleport to Nearest Fruit"
-    end
-end
-
-TPFruitBtn.MouseButton1Click:Connect(function()
-    TeleportToFruit()
 end)
 
 --===================================================================================--
---                       FOG & SEA 6 REMOVER LOGIC ENGINE                            --
+--                    FOG & SEA 6 REMOVER LOGIC ENGINE                               --
 --===================================================================================--
 
 local function ApplyNoFog()
@@ -704,7 +714,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --===================================================================================--
---                REALTIME DYNAMIC AUTOMATIC FRUIT & PLAYER ESP                       --
+--             REALTIME DYNAMIC AUTOMATIC FRUIT & PLAYER ESP                         --
 --===================================================================================--
 
 local function ClearFruitESP()
@@ -725,7 +735,6 @@ end
 local function CreateFruitBillboard(fruit)
     if not fruit or not Settings.FruitESPEnabled then return end
     
-    -- Check if already tracked
     for _, item in pairs(ESPContainers.Fruits) do
         if item.Fruit == fruit then return end
     end
@@ -767,7 +776,6 @@ local function ScanFruits()
     end
 end
 
--- Hook Realtime Workspace Events for Instant Fruit Detection (Spawns / Drops)
 local function StartFruitListeners()
     for _, conn in pairs(FruitWorkspaceConnections) do
         if conn then conn:Disconnect() end
@@ -899,90 +907,22 @@ local function ClearPlayerESP()
     PlayerESPConnections = {}
 end
 
-local function EnablePlayerESP()
-    ClearPlayerESP()
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        HookPlayer(player)
-    end
-    
-    local playerAddedConn = Players.PlayerAdded:Connect(function(player)
-        HookPlayer(player)
-    end)
-    table.insert(PlayerESPConnections, playerAddedConn)
-    
-    local playerRemovingConn = Players.PlayerRemoving:Connect(function(player)
-        RemovePlayerESP(player)
-    end)
-    table.insert(PlayerESPConnections, playerRemovingConn)
-end
-
 PlayerESPBtn.MouseButton1Click:Connect(function()
     Settings.PlayerESPEnabled = not Settings.PlayerESPEnabled
     PlayerESPBtn.Text = Settings.PlayerESPEnabled and "Player ESP: ON" or "Player ESP: OFF"
     PlayerESPBtn.TextColor3 = Settings.PlayerESPEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
+    
     if Settings.PlayerESPEnabled then
-        EnablePlayerESP()
+        for _, p in pairs(Players:GetPlayers()) do HookPlayer(p) end
     else
         ClearPlayerESP()
     end
 end)
 
--- CONTINUOUS SCAN & POSITION UPDATER (Fruit Backup & Player Check)
-task.spawn(function()
-    while task.wait(1) do
-        -- Player ESP scanning
-        if Settings.PlayerESPEnabled then
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer then
-                    if not HasESP(player) and player.Character and player.Character:FindFirstChild("Head") then
-                        CreatePlayerBillboard(player)
-                    end
-                end
-            end
-        end
-        
-        -- Backup Fruit Check for missed fruits
-        if Settings.FruitESPEnabled then
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if IsFruit(v) then
-                    CreateFruitBillboard(v)
-                end
-            end
-        end
-    end
+Players.PlayerAdded:Connect(function(p)
+    if Settings.PlayerESPEnabled then HookPlayer(p) end
 end)
 
--- Realtime Distance and Color Updater
-task.spawn(function()
-    while task.wait(0.3) do
-        local myRoot = Character and Character:FindFirstChild("HumanoidRootPart")
-        
-        -- Fruit ESP Distance Updates & Cleanup
-        if Settings.FruitESPEnabled and myRoot then
-            for i = #ESPContainers.Fruits, 1, -1 do
-                local entry = ESPContainers.Fruits[i]
-                if entry.Fruit and entry.Fruit.Parent and entry.Handle and entry.Handle.Parent then
-                    local dist = math.floor((myRoot.Position - entry.Handle.Position).Magnitude)
-                    entry.Label.Text = string.format("%s\n[%d M]", entry.Fruit.Name, dist)
-                else
-                    if entry.Billboard then entry.Billboard:Destroy() end
-                    table.remove(ESPContainers.Fruits, i)
-                end
-            end
-        end
-
-        -- Player ESP Updates
-        if Settings.PlayerESPEnabled then
-            for i = #ESPContainers.Players, 1, -1 do
-                local entry = ESPContainers.Players[i]
-                if entry.Player and entry.Player.Parent and entry.Head and entry.Head.Parent then
-                    entry.Label.TextColor3 = GetTeamColor(entry.Player)
-                else
-                    if entry.Billboard then entry.Billboard:Destroy() end
-                    table.remove(ESPContainers.Players, i)
-                end
-            end
-        end
-    end
+Players.PlayerRemoving:Connect(function(p)
+    RemovePlayerESP(p)
 end)
