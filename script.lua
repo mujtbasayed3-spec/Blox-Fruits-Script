@@ -27,7 +27,7 @@ local Settings = {
     PlayerESPEnabled = false,
     NoFogEnabled = false,
     NoSea6Darkness = false,
-    FruitFlyEnabled = false
+    FruitFlyEnabled = true
 }
 
 -- ESP Containers & Connections
@@ -166,8 +166,6 @@ ToggleButton.Position = UDim2.new(0, 12, 0, 55)
 ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
 ToggleButton.BackgroundTransparency = 0.1
 ToggleButton.ScaleType = Enum.ScaleType.Crop
-
--- استخدام معرّف الصورة الخاص بك المرفوع على روبلوكس
 ToggleButton.Image = "rbxassetid://125840677896258"
 ToggleButton.Parent = ScreenGui
 
@@ -520,7 +518,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Noclip Stepped Loop (Disables Part Collisions Continuously)
+-- Noclip Stepped Loop
 RunService.Stepped:Connect(function()
     if Settings.NoclipEnabled and Character then
         for _, part in pairs(Character:GetDescendants()) do
@@ -568,8 +566,8 @@ local FruitFlightBtn = Instance.new("TextButton")
 FruitFlightBtn.Size = UDim2.new(1, 0, 0, 30)
 FruitFlightBtn.Position = UDim2.new(0, 0, 0, 80)
 FruitFlightBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
-FruitFlightBtn.Text = Settings.FruitFlyEnabled and "Fruit Flight (طيران للفاكهة): ON" or "Fruit Flight (طيران للفاكهة): OFF"
-FruitFlightBtn.TextColor3 = Settings.FruitFlyEnabled and Color3.fromRGB(80, 255, 120) or Color3.fromRGB(255, 80, 80)
+FruitFlightBtn.Text = "Fruit Flight (طيران للفاكهة): ON"
+FruitFlightBtn.TextColor3 = Color3.fromRGB(80, 255, 120)
 FruitFlightBtn.Font = Enum.Font.SourceSansBold
 FruitFlightBtn.TextSize = 13
 FruitFlightBtn.Parent = ESPContent
@@ -714,9 +712,10 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --===================================================================================--
---             REALTIME DYNAMIC AUTOMATIC FRUIT & PLAYER ESP                         --
+--             ADVANCED CLEAN & HIGH QUALITY PLAYER & FRUIT ESP ENGINE               --
 --===================================================================================--
 
+-- Clean up Fruit ESP
 local function ClearFruitESP()
     for _, esp in pairs(ESPContainers.Fruits) do
         if esp and esp.Billboard then esp.Billboard:Destroy() end
@@ -748,7 +747,7 @@ local function CreateFruitBillboard(fruit)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "FruitESP_Gui"
     billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 150, 0, 40)
+    billboard.Size = UDim2.new(0, 180, 0, 30)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.Adornee = handle
 
@@ -757,7 +756,7 @@ local function CreateFruitBillboard(fruit)
     textLabel.BackgroundTransparency = 1
     textLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
     textLabel.TextStrokeTransparency = 0.2
-    textLabel.TextSize = 14
+    textLabel.TextSize = 13
     textLabel.Font = Enum.Font.SourceSansBold
     textLabel.Text = fruit.Name
     textLabel.Parent = billboard
@@ -765,6 +764,18 @@ local function CreateFruitBillboard(fruit)
 
     table.insert(ESPContainers.Fruits, { Fruit = fruit, Handle = handle, Billboard = billboard, Label = textLabel })
 end
+
+-- Update Fruit Distance Continuously
+RunService.RenderStepped:Connect(function()
+    if Settings.FruitESPEnabled and RootPart then
+        for _, entry in pairs(ESPContainers.Fruits) do
+            if entry.Handle and entry.Label and entry.Handle.Parent then
+                local dist = math.floor((RootPart.Position - entry.Handle.Position).Magnitude)
+                entry.Label.Text = entry.Fruit.Name .. " [" .. dist .. "m]"
+            end
+        end
+    end
+end)
 
 local function ScanFruits()
     ClearFruitESP()
@@ -816,23 +827,21 @@ FruitESPBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Player ESP Helpers
+--===================================================================================--
+--                   ADVANCED CLEAN & ULTRA-DETAILED PLAYER ESP                      --
+--===================================================================================--
+
+-- Determine Team Color (Red = Pirates, Blue = Marines)
 local function GetTeamColor(player)
     if player.Team then
         local name = string.lower(player.Team.Name)
-        if string.find(name, "pirate") then return Color3.fromRGB(255, 50, 50) end
-        if string.find(name, "marine") then return Color3.fromRGB(50, 150, 255) end
-    end
-    return Color3.fromRGB(200, 200, 200)
-end
-
-local function HasESP(player)
-    for _, entry in pairs(ESPContainers.Players) do
-        if entry.Player == player and entry.Billboard and entry.Billboard.Parent then
-            return true
+        if string.find(name, "pirate") or string.find(name, "قراصنة") then 
+            return Color3.fromRGB(255, 50, 50) -- أحمر للقراصنة
+        elseif string.find(name, "marine") or string.find(name, "بحرية") then 
+            return Color3.fromRGB(0, 150, 255) -- أزرق للبحرية
         end
     end
-    return false
+    return Color3.fromRGB(255, 50, 50) -- الافتراضي قراصنة (أحمر)
 end
 
 local function RemovePlayerESP(player)
@@ -852,32 +861,117 @@ local function CreatePlayerBillboard(player)
     if not char then return end
     
     local head = char:FindFirstChild("Head")
-    if not head then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not head or not hum then return end
     
-    if head:FindFirstChild("PlayerESP_Gui") then return end
+    if head:FindFirstChild("CleanPlayerESP_Gui") then return end
 
     RemovePlayerESP(player)
 
+    -- Billboard Gui Setup
     local billboard = Instance.new("BillboardGui")
-    billboard.Name = "PlayerESP_Gui"
+    billboard.Name = "CleanPlayerESP_Gui"
     billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 150, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.Size = UDim2.new(0, 200, 0, 70)
+    billboard.StudsOffset = Vector3.new(0, 3.5, 0)
     billboard.Adornee = head
 
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.TextColor3 = GetTeamColor(player)
-    textLabel.TextStrokeTransparency = 0.2
-    textLabel.TextSize = 13
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.Text = player.DisplayName .. " (@" .. player.Name .. ")"
-    textLabel.Parent = billboard
+    -- Container Frame
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 1, 0)
+    container.BackgroundTransparency = 1
+    container.Parent = billboard
+
+    -- Name Label (Red/Blue based on Team)
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "NameLabel"
+    nameLabel.Size = UDim2.new(1, 0, 0, 18)
+    nameLabel.Position = UDim2.new(0, 0, 0, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = GetTeamColor(player)
+    nameLabel.TextStrokeTransparency = 0.2
+    nameLabel.TextSize = 14
+    nameLabel.Font = Enum.Font.SourceSansBold
+    nameLabel.Text = player.DisplayName .. " [0m]"
+    nameLabel.Parent = container
+
+    -- Health & Energy Status Label
+    local statsLabel = Instance.new("TextLabel")
+    statsLabel.Name = "StatsLabel"
+    statsLabel.Size = UDim2.new(1, 0, 0, 16)
+    statsLabel.Position = UDim2.new(0, 0, 0, 18)
+    statsLabel.BackgroundTransparency = 1
+    statsLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+    statsLabel.TextStrokeTransparency = 0.3
+    statsLabel.TextSize = 12
+    statsLabel.Font = Enum.Font.SourceSansBold
+    statsLabel.Text = "HP: " .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth)
+    statsLabel.Parent = container
+
+    -- Health Bar Background
+    local barBg = Instance.new("Frame")
+    barBg.Name = "BarBg"
+    barBg.Size = UDim2.new(0.8, 0, 0, 5)
+    barBg.Position = UDim2.new(0.1, 0, 0, 38)
+    barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    barBg.BorderSizePixel = 0
+    barBg.Parent = container
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = barBg
+
+    -- Health Bar Fill
+    local barFill = Instance.new("Frame")
+    barFill.Name = "BarFill"
+    barFill.Size = UDim2.new(math.clamp(hum.Health / hum.MaxHealth, 0, 1), 0, 1, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(80, 255, 120)
+    barFill.BorderSizePixel = 0
+    barFill.Parent = barBg
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = barFill
+
     billboard.Parent = head
 
-    table.insert(ESPContainers.Players, { Player = player, Head = head, Billboard = billboard, Label = textLabel })
+    table.insert(ESPContainers.Players, { 
+        Player = player, 
+        Character = char, 
+        Head = head, 
+        Humanoid = hum, 
+        Billboard = billboard, 
+        NameLabel = nameLabel, 
+        StatsLabel = statsLabel,
+        BarFill = barFill 
+    })
 end
+
+-- Live Loop updating Player Distances, Health, & Energy
+RunService.RenderStepped:Connect(function()
+    if Settings.PlayerESPEnabled and RootPart then
+        for _, entry in pairs(ESPContainers.Players) do
+            if entry.Character and entry.Head and entry.Head.Parent and entry.Humanoid and entry.Humanoid.Parent then
+                local dist = math.floor((RootPart.Position - entry.Head.Position).Magnitude)
+                
+                -- Update Name and Distance
+                entry.NameLabel.Text = entry.Player.DisplayName .. " [" .. dist .. "m]"
+                entry.NameLabel.TextColor3 = GetTeamColor(entry.Player)
+                
+                -- Update Health Info & Bar Fill
+                local hp = math.floor(entry.Humanoid.Health)
+                local maxHp = math.floor(entry.Humanoid.MaxHealth)
+                entry.StatsLabel.Text = "HP: " .. hp .. " / " .. maxHp
+                
+                local hpPercent = math.clamp(entry.Humanoid.Health / entry.Humanoid.MaxHealth, 0, 1)
+                entry.BarFill.Size = UDim2.new(hpPercent, 0, 1, 0)
+                
+                -- Smooth Color Transition for Health Bar (Green to Red)
+                entry.BarFill.BackgroundColor3 = Color3.fromRGB(255 * (1 - hpPercent), 255 * hpPercent, 80)
+            end
+        end
+    end
+end)
 
 local function HookPlayer(player)
     if player == LocalPlayer then return end
